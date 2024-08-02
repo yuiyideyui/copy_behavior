@@ -19,7 +19,7 @@ const sleep = (time)=>{
         const page = await browser.newPage();
 
         // Navigate the page to a URL.
-        await page.goto('http://205.234.201.137:96/');
+        await page.goto('http://127.0.0.1:96/');
 
         // Set screen size.
         await page.setViewport({ width: 1920, height: 1080 });
@@ -29,14 +29,12 @@ const sleep = (time)=>{
                     page.waitForFileChooser(),
                 ]);
                 await fileChooser.accept(['./交通道路.mp4']);
-                console.log('上传了');
                 resolve();
             } catch (error) {
                 reject(error);
             }
         })
         const behavior = JSON.parse(fs.readFileSync('./behavior.json'));
-        console.log('behavior',behavior);
         for(let i = 0; i<behavior.length; i++){
             let nowBe = behavior[i];
             if(nowBe.type == 'mousedown'){
