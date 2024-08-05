@@ -1,5 +1,5 @@
-const { behaviorFn } = require('../inBehavior');
-const { do_behavior } = require('../behavior');
+const { behaviorFn } = require('./inBehavior');
+const { do_behavior } = require('./behavior');
 /**
  * 一个上传等待的方法
  */
@@ -12,7 +12,7 @@ const customFn = [(page) => {
             const [fileChooser] = await Promise.all([
                 page.waitForFileChooser(),
             ]);
-            await fileChooser.accept(['../交通道路.mp4']);
+            await fileChooser.accept(['../../交通道路.mp4']);
             console.log('上传中');
             //监听上传进度
             // setInterval(async() => {
@@ -30,5 +30,5 @@ const customFn = [(page) => {
         }
     })
 }]
-behaviorFn('http://127.0.0.1:5503/html/test1.html', {headless: false,defaultViewport: { width: 1920, height: 1080 }}, customFn,'./upload.json')
-// do_behavior('http://127.0.0.1:5503/html/test1.html', {headless: false,defaultViewport: { width: 1920, height: 1080 }}, customFn,'./upload.json')
+// behaviorFn('http://127.0.0.1:5503/html/test1.html', {headless: false,defaultViewport: { width: 1920, height: 1080 }}, customFn,'./upload.json')
+do_behavior('http://127.0.0.1:5503/html/test1.html', {headless: false,defaultViewport: { width: 1920, height: 1080 }}, customFn,'./upload.json')
