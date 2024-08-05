@@ -8,9 +8,9 @@ const fs = require('fs');
  * @param {String} pageUrl 页面url
  * @param {Object} launchOption launch配置
  * @param {ArrayFunction} customFunction 自定义方法-如fileChooser 给function传入page参数
- * 
+ * @param {String} outFilePath 输出文件路径
  */
-exports.behaviorFn = async (pageUrl,launchOption,customFunction=[]) => {
+exports.behaviorFn = async (pageUrl,launchOption,customFunction=[],outFilePath='./out.json') => {
     let behavior = []
     try {
         // Launch the browser and open a new blank page
@@ -19,17 +19,16 @@ exports.behaviorFn = async (pageUrl,launchOption,customFunction=[]) => {
         // Navigate the page to a URL.
         await page.goto(pageUrl);
         // Set screen size.
-        await page.setViewport({ width: 1920, height: 1080 });
+        // await page.setViewport({ width: 1920, height: 1080 });
         //接收自定义方法
         let allFnArray = []
         customFunction.forEach(async (fn) => {
             allFnArray.push(fn(page)) 
         })
 
-        behavior = page.evaluate(async ({clickEnd}) => {
+        behavior = page.evaluate(async () => {
             return new Promise((resolve, reject) => {
                 let behavior = []
-                let end = 0
                 window.addEventListener('mousedown', function (e) {
                     behavior.push({
                         type: 'mousedown',
@@ -58,11 +57,11 @@ exports.behaviorFn = async (pageUrl,launchOption,customFunction=[]) => {
                     }
                 });
             });
-        },{clickEnd})
+        })
         
         //等待方法的结束
         await Promise.all([...allFnArray,behavior])
-        fs.writeFileSync('behavior.json', JSON.stringify(await behavior));
+        fs.writeFileSync(outFilePath, JSON.stringify(await behavior));
         await browser.close();
     } catch (error) {
         console.log('error', error);
