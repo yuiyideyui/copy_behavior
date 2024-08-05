@@ -4,13 +4,13 @@ const fs = require('fs');
 // Or import puppeteer from 'puppeteer-core';
 
 /**
- * 
+ * 按下Escape退出页面行为监听记录
  * @param {String} pageUrl 页面url
  * @param {Object} launchOption launch配置
  * @param {ArrayFunction} customFunction 自定义方法-如fileChooser 给function传入page参数
- * @param {Number} clickEnd 页面点击几次结束
+ * 
  */
-exports.behaviorFn = async (pageUrl,launchOption,customFunction=[],clickEnd=15) => {
+exports.behaviorFn = async (pageUrl,launchOption,customFunction=[]) => {
     let behavior = []
     try {
         // Launch the browser and open a new blank page
@@ -20,21 +20,13 @@ exports.behaviorFn = async (pageUrl,launchOption,customFunction=[],clickEnd=15) 
         await page.goto(pageUrl);
         // Set screen size.
         await page.setViewport({ width: 1920, height: 1080 });
+        //接收自定义方法
+        let allFnArray = []
         customFunction.forEach(async (fn) => {
-            await fn(page)
+            allFnArray.push(fn(page)) 
         })
-        // new Promise(async (resolve, reject) => {
-        //     try {
-        //         const [fileChooser] = await Promise.all([
-        //             page.waitForFileChooser(),
-        //         ]);
-        //         await fileChooser.accept(['./交通道路.mp4']);
-        //         resolve();
-        //     } catch (error) {
-        //         reject(error);
-        //     }
-        // })
-        behavior = await page.evaluate(async (clickEnd) => {
+
+        behavior = page.evaluate(async ({clickEnd}) => {
             return new Promise((resolve, reject) => {
                 let behavior = []
                 let end = 0
@@ -44,8 +36,12 @@ exports.behaviorFn = async (pageUrl,launchOption,customFunction=[],clickEnd=15) 
                         x: e.x,
                         y: e.y
                     })
-                    end += 1
-                    if (end == clickEnd) resolve(behavior)
+                })
+                document.addEventListener('keyup', function (e) {
+                    //此处填写你的业务逻辑即可
+                    if (e.code == 'Escape') {
+                        resolve(behavior)
+                    }
                 })
                 window.addEventListener('wheel', function (event) {
                     // 阻止默认滚动行为
@@ -63,8 +59,10 @@ exports.behaviorFn = async (pageUrl,launchOption,customFunction=[],clickEnd=15) 
                 });
             });
         },{clickEnd})
-        fs.writeFileSync('behavior.json', JSON.stringify(behavior));
-
+        
+        //等待方法的结束
+        await Promise.all([...allFnArray,behavior])
+        fs.writeFileSync('behavior.json', JSON.stringify(await behavior));
         await browser.close();
     } catch (error) {
         console.log('error', error);
