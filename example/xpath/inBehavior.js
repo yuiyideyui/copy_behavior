@@ -30,8 +30,8 @@ exports.behaviorFn = async (pageUrl,launchOption,customFunction=[],outFilePath='
             return new Promise((resolve, reject) => {
                 let behavior = []
                 function getXPath(node) {
-                    if (node.id !== '')
-                        return `id("${node.id}")`;
+                    // if (node.id !== '' && !node.id.startsWith('el'))
+                    //     return `id("${node.id}")`;
                     if (node === document.body)
                         return '/html/'+node.tagName;
         
