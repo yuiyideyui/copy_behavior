@@ -27,12 +27,13 @@ exports.do_behavior = async (pageUrl, launchOption, customFunction = [], inFileP
     customFunction.forEach(async (fn) => {
         allFnArray.push(fn(page))
     })
-    await sleep(1000)
+    // await page.setDefaultNavigationTimeout(60000);
+    // await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await sleep(3000)
     const behavior = JSON.parse(fs.readFileSync(inFilePath));
     for (let i = 0; i < behavior.length; i++) {
         let nowBe = behavior[i];
         if (nowBe.type == 'xPath') {
-            // await page.mouse.click(nowBe.x, nowBe.y)
             // Runs the `//h2` as the XPath expression.
             const element = await page.waitForSelector(`::-p-xpath(${nowBe.xpath})`);
             element.click();
