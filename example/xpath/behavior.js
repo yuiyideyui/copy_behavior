@@ -14,9 +14,10 @@ const sleep = (time) => {
  * @param {String} pageUrl 页面url
  * @param {Object} launchOption launch配置
  * @param {ArrayFunction} customFunction 自定义方法-如fileChooser 给function传入page参数
+ * @param {Object} objFn inputFile:Array[] -文件上传 
  * @param {String} inFilePath 输入文件路径
  */
-exports.do_behavior = async (pageUrl, launchOption, customFunction = [], inFilePath = './out.json') => {
+exports.do_behavior = async (pageUrl, launchOption, customFunction = [],objFn = {}, inFilePath = './out.json') => {
     // Launch the browser and open a new blank page
     const browser = await puppeteer.launch(launchOption);
     const page = await browser.newPage();
@@ -27,6 +28,12 @@ exports.do_behavior = async (pageUrl, launchOption, customFunction = [], inFileP
     customFunction.forEach(async (fn) => {
         allFnArray.push(fn(page))
     })
+
+    //objFn的inputFile的index
+    let inputFileIndex = 0
+    let inputTextIndex = 0
+    let textAreaIndex = 0
+
     // await page.setDefaultNavigationTimeout(60000);
     // await page.waitForNavigation({ waitUntil: 'networkidle0' });
     await sleep(3000)
@@ -41,6 +48,25 @@ exports.do_behavior = async (pageUrl, launchOption, customFunction = [], inFileP
         }
         else if (nowBe.type == 'wheel') {
             await page.mouse.wheel({ deltaY: nowBe.deltaY })
+            await sleep(1000)
+        }else if(nowBe.type == 'inputFile'){
+            await objFn.inputFile[inputFileIndex]()
+            inputFileIndex++
+        }else if(nowBe.type == 'inputText'){
+            const element = await page.waitForSelector(`::-p-xpath(${nowBe.xpath})`);
+            element.focus();
+            await element.evaluate((el,{value}) => {
+                el.value = value
+            },{value:objFn.inputText[inputTextIndex]});
+            inputTextIndex++
+            await sleep(1000)
+        }else if(nowBe.type == 'textArea'){
+            const element = await page.waitForSelector(`::-p-xpath(${nowBe.xpath})`);
+            element.focus();
+            await element.evaluate((el,{value}) => {
+                el.value = value
+            },objFn.textArea[textAreaIndex]);
+            textAreaIndex++
             await sleep(1000)
         }
     }
