@@ -1,1 +1,1 @@
-[{"type":"inputText","xpath":"/html/BODY/INPUT[2]"},{"type":"xPath","xpath":"/html/BODY"}]
+[{"type":"inputFile","xpath":"/html/BODY/INPUT[1]"},{"type":"inputText","xpath":"/html/BODY/INPUT[2]"},{"type":"xPath","xpath":"/html/BODY"},{"type":"xPath","xpath":"/html/BODY/BUTTON[1]"},{"type":"inputText","xpath":"/html/BODY/INPUT[2]"},{"type":"xPath","xpath":"/html/BODY"}]

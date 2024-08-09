@@ -17,26 +17,13 @@ exports.behaviorFn = async (pageUrl,launchOption,outFilePath='./out.json') => {
         const page = await browser.newPage();
         // Navigate the page to a URL.
         await page.goto(pageUrl);
-        // Set screen size.
-        // await page.setViewport({ width: 1920, height: 1080 });
-        //接收自定义方法
-        // let allFnArray = []
-        // customFunction.forEach(async (fn) => {
-        //     allFnArray.push(fn(page)) 
-        // })
-        page.on('framenavigated', async (frame) => {
-            console.log('Frame navigated to:', frame.url());
-            // Execute additional logic here
-        });
         behavior = page.evaluate(async () => {
             return new Promise((resolve, reject) => {
                 let behavior = []
+                //生成Xpath路径
                 function getXPath(node) {
-                    // if (node.id !== '' && !node.id.startsWith('el'))
-                    //     return `id("${node.id}")`;
                     if (node === document.body)
                         return '/html/'+node.tagName;
-
                     let nodeCount = 0;
                     let siblings = node.parentNode.childNodes;
                     for (let i = 0; i < siblings.length; i++) {
@@ -47,11 +34,12 @@ exports.behaviorFn = async (pageUrl,launchOption,outFilePath='./out.json') => {
                             nodeCount++;
                     }
                 }
+
                 window.addEventListener('mousedown', function (e) {
                     if (e.target.tagName.toLowerCase() === 'input' && e.target.type === 'file') {
                         behavior.push({
                             type: 'inputFile',
-                            // xpath:getXPath(e.target)
+                            xpath:getXPath(e.target)
                         })
                     } else if(e.target.tagName.toLowerCase() === 'input' && e.target.type === 'text'){
                         behavior.push({
@@ -72,7 +60,7 @@ exports.behaviorFn = async (pageUrl,launchOption,outFilePath='./out.json') => {
                     
                 })
                 document.addEventListener('keyup', function (e) {
-                    //此处填写你的业务逻辑即可
+                    //退出
                     if (e.code == 'Escape') {
                         resolve(behavior)
                     }
@@ -80,6 +68,7 @@ exports.behaviorFn = async (pageUrl,launchOption,outFilePath='./out.json') => {
                 window.addEventListener('wheel', function (event) {
                     // 阻止默认滚动行为
                     event.preventDefault();
+                    //复制滚轮行为
                     behavior.push({
                         type: 'wheel',
                         deltaY: event.deltaY
