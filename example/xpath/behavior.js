@@ -29,8 +29,9 @@ exports.do_behavior = async (pageUrl, launchOption, customFunction = [],objFn = 
         allFnArray.push(fn(page))
     })
 
-    //objFn的inputFile的index
+    //objFn的index
     let inputFileIndex = 0
+    let inputFilePromise = []
     let inputTextIndex = 0
     let textAreaIndex = 0
 
@@ -50,8 +51,11 @@ exports.do_behavior = async (pageUrl, launchOption, customFunction = [],objFn = 
             await page.mouse.wheel({ deltaY: nowBe.deltaY })
             await sleep(1000)
         }else if(nowBe.type == 'inputFile'){
-            await objFn.inputFile[inputFileIndex]()
+            const element = await page.waitForSelector(`::-p-xpath(${nowBe.xpath})`);
+            inputFilePromise.push(objFn.inputFile[inputFileIndex](page,element))
+            // element.click();
             inputFileIndex++
+            
         }else if(nowBe.type == 'inputText'){
             const element = await page.waitForSelector(`::-p-xpath(${nowBe.xpath})`);
             element.focus();
@@ -65,12 +69,13 @@ exports.do_behavior = async (pageUrl, launchOption, customFunction = [],objFn = 
             element.focus();
             await element.evaluate((el,{value}) => {
                 el.value = value
-            },objFn.textArea[textAreaIndex]);
+            },{value:objFn.textArea[textAreaIndex]});
             textAreaIndex++
             await sleep(1000)
         }
     }
     //等待方法的结束
-    await Promise.all([...allFnArray])
+    await Promise.all([...allFnArray,inputFilePromise])
+    await sleep(1000)
     await browser.close();
 }
